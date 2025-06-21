@@ -57,7 +57,19 @@ const AuthService = {
         created_at: true
       }
     });
-  }
+  },
+
+  async findUserByEmail(email) {
+  return await prisma.users.findUnique({ where: { email } });
+},
+
+async updatePassword(email, newPassword) {
+  const hashed = await bcrypt.hash(newPassword, 10);
+  return await prisma.users.update({
+    where: { email },
+    data: { password_hash: hashed }
+  });
+}
 };
 
 export default AuthService;

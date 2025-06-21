@@ -10,4 +10,6 @@ router.post('/login', AuthController.login);
 router.post('/logout', AuthController.logout);
 router.get('/me', authMiddleware, AuthController.me); // <== ici
 router.post('/refresh', AuthController.refreshToken);
+router.post('/reset-password', AuthController.resetPassword);
+router.post('/update-password', AuthController.updatePassword);
 export default router;
