@@ -1,21 +1,23 @@
-# Utilise une image Node officielle
-FROM node:18
+# Utilise une image Node officielle (Debian pour éviter les erreurs de permission)
+FROM node:18-bullseye
 
 # Crée un répertoire de travail
 WORKDIR /app
 
-# Copie les fichiers package.json et install
+# Copie les fichiers de dépendances
 COPY package*.json ./
+
+# Installe les dépendances (inclut Prisma CLI)
 RUN npm install
 
-# Copie le reste du code source
+# Copie le reste du code
 COPY . .
 
-# Génère Prisma Client
-RUN npx prisma generate
+# Exécute prisma generate sans erreur
+RUN npx --yes prisma generate
 
-# Expose le port backend
+# Expose le port
 EXPOSE 5000
 
-# Commande de démarrage
-CMD ["npm", "run", "dev"]
+# Démarre l'application en prod (pas en mode dev !)
+CMD ["npm", "start"]
