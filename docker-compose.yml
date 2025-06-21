@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  backend:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      DATABASE_URL: "postgresql://postgres.yxcvqkrytbcpbnkwvffw:XJRRBHQkGA4YPj6k@aws-0-eu-west-2.pooler.supabase.com:5432/postgres"
+      DIRECT_URL: "postgresql://postgres.yxcvqkrytbcpbnkwvffw:XJRRBHQkGA4YPj6k@aws-0-eu-west-2.pooler.supabase.com:5432/postgres"
+      PRISMA_DISABLE_PREPARED_STATEMENTS: "true"
+      JWT_SECRET: "LFwY9P3v@hkd!Z4qMnE78A6xD#rbx!KU%tpa9Ns"
+    depends_on: []
+
+# On retire le service `db` car on utilise la base distante de Supabase

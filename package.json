@@ -1,0 +1,25 @@
+{
+  "name": "paie-backend",
+  "version": "1.0.0",
+  "description": "Backend Lovable - Express + Prisma + Docker + JWT",
+  "main": "src/app.js",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon src/app.js",
+    "start": "node src/app.js"
+  },
+  "dependencies": {
+    "@prisma/client": "^4.16.2",
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0",
+    "zod": "^3.25.64"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10",
+    "prisma": "^4.16.2"
+  }
+}

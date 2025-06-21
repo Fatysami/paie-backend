@@ -1,0 +1,390 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+   provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model absences {
+  id                         String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  employe_id                 String?    @db.Uuid
+  date_debut                 DateTime   @db.Date
+  date_fin                   DateTime   @db.Date
+  heure_debut                DateTime?  @db.Time(6)
+  heure_fin                  DateTime?  @db.Time(6)
+  nombre_jours               Decimal    @db.Decimal(4, 2)
+  type_absence               String     @db.VarChar(30)
+  statut                     String     @db.VarChar(20)
+  motif                      String
+  motif_refus                String?
+  justificatif_url           String?
+  justificatif_requis        Boolean?   @default(false)
+  justificatif_valide        Boolean?
+  date_validite_justificatif DateTime?  @db.Date
+  declare_par                String     @db.VarChar(10)
+  remunere                   Boolean?   @default(false)
+  taux_remuneration          Decimal?   @db.Decimal(5, 2)
+  impact_cnss                Boolean?   @default(false)
+  impact_amo                 Boolean?   @default(false)
+  retenue_salaire            Decimal?   @db.Decimal(10, 2)
+  commentaire_rh             String?
+  created_at                 DateTime?  @default(now()) @db.Timestamp(6)
+  updated_at                 DateTime?  @default(now()) @db.Timestamp(6)
+  employees                  employees? @relation(fields: [employe_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model avantages {
+  id          String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  employe_id  String?    @db.Uuid
+  nom         String     @db.VarChar(100)
+  type        String     @db.VarChar(20)
+  valeur      Decimal    @db.Decimal(10, 2)
+  description String?
+  date_debut  DateTime?  @db.Date
+  date_fin    DateTime?  @db.Date
+  actif       Boolean?   @default(true)
+  created_at  DateTime?  @default(now()) @db.Timestamp(6)
+  employees   employees? @relation(fields: [employe_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model bulletins_paie {
+  id                                     String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  employe_id                             String?         @db.Uuid
+  mois                                   Int
+  annee                                  Int
+  date_generation                        DateTime?       @default(now()) @db.Timestamp(6)
+  date_paiement                          DateTime?       @db.Date
+  salaire_base                           Decimal         @db.Decimal(10, 2)
+  total_primes                           Decimal?        @default(0) @db.Decimal(10, 2)
+  total_avantages                        Decimal?        @default(0) @db.Decimal(10, 2)
+  total_retenues                         Decimal?        @default(0) @db.Decimal(10, 2)
+  montant_brut                           Decimal         @db.Decimal(10, 2)
+  montant_net                            Decimal         @db.Decimal(10, 2)
+  cnss_employee                          Decimal?        @default(0) @db.Decimal(10, 2)
+  cnss_employer                          Decimal?        @default(0) @db.Decimal(10, 2)
+  amo_employee                           Decimal?        @default(0) @db.Decimal(10, 2)
+  amo_employer                           Decimal?        @default(0) @db.Decimal(10, 2)
+  cimr_employee                          Decimal?        @default(0) @db.Decimal(10, 2)
+  cimr_employer                          Decimal?        @default(0) @db.Decimal(10, 2)
+  impot_revenu                           Decimal?        @default(0) @db.Decimal(10, 2)
+  statut                                 String?         @default("généré") @db.VarChar(20)
+  pdf_url                                String?
+  genere_par                             String?         @db.Uuid
+  valide_par                             String?         @db.Uuid
+  date_validation                        DateTime?       @db.Timestamp(6)
+  created_at                             DateTime?       @default(now()) @db.Timestamp(6)
+  updated_at                             DateTime?       @default(now()) @db.Timestamp(6)
+  employees                              employees?      @relation(fields: [employe_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users_bulletins_paie_genere_parTousers users?          @relation("bulletins_paie_genere_parTousers", fields: [genere_par], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_bulletins_paie_valide_parTousers users?          @relation("bulletins_paie_valide_parTousers", fields: [valide_par], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  elements_paie                          elements_paie[]
+  virements                              virements[]
+
+  @@unique([employe_id, mois, annee])
+}
+
+model companies {
+  id            String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name          String          @db.VarChar(255)
+  siret         String?         @unique @db.VarChar(20)
+  sector        String?         @db.VarChar(100)
+  address       String
+  email         String          @db.VarChar(255)
+  phone         String?         @db.VarChar(20)
+  created_at    DateTime?       @default(now()) @db.Timestamp(6)
+  updated_at    DateTime?       @default(now()) @db.Timestamp(6)
+  employees     employees[]
+  subscriptions subscriptions[]
+  types_conges  types_conges[]
+  users         users[]
+}
+
+model competences {
+  id             String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  employe_id     String?    @db.Uuid
+  nom            String     @db.VarChar(100)
+  niveau         String?    @db.VarChar(50)
+  certifie       Boolean?   @default(false)
+  date_obtention DateTime?  @db.Date
+  employees      employees? @relation(fields: [employe_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model criteres_evaluation {
+  id            String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  evaluation_id String?      @db.Uuid
+  nom           String       @db.VarChar(100)
+  description   String?
+  poids         Int
+  note          Decimal?     @db.Decimal(3, 2)
+  commentaire   String?
+  evaluations   evaluations? @relation(fields: [evaluation_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model demandes_conges {
+  id                                                 String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  employe_id                                         String?       @db.Uuid
+  type_conge_id                                      String?       @db.Uuid
+  date_debut                                         DateTime      @db.Date
+  date_fin                                           DateTime      @db.Date
+  nombre_jours                                       Int
+  statut                                             String        @db.VarChar(20)
+  commentaire                                        String?
+  justificatif_url                                   String?
+  validation_manager_id                              String?       @db.Uuid
+  validation_manager_date                            DateTime?     @db.Timestamp(6)
+  validation_rh_id                                   String?       @db.Uuid
+  validation_rh_date                                 DateTime?     @db.Timestamp(6)
+  created_at                                         DateTime?     @default(now()) @db.Timestamp(6)
+  updated_at                                         DateTime?     @default(now()) @db.Timestamp(6)
+  employees                                          employees?    @relation(fields: [employe_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  types_conges                                       types_conges? @relation(fields: [type_conge_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_demandes_conges_validation_manager_idTousers users?        @relation("demandes_conges_validation_manager_idTousers", fields: [validation_manager_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  users_demandes_conges_validation_rh_idTousers      users?        @relation("demandes_conges_validation_rh_idTousers", fields: [validation_rh_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model diplomes {
+  id             String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  employe_id     String?    @db.Uuid
+  nom            String     @db.VarChar(200)
+  etablissement  String?    @db.VarChar(200)
+  date_obtention DateTime?  @db.Date
+  niveau         String?    @db.VarChar(100)
+  employees      employees? @relation(fields: [employe_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model documents_employes {
+  id              String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  employe_id      String?    @db.Uuid
+  nom             String     @db.VarChar(200)
+  type            String     @db.VarChar(50)
+  description     String?
+  file_name       String?    @db.VarChar(255)
+  file_size       Int?
+  file_url        String?
+  mime_type       String?    @db.VarChar(100)
+  date_upload     DateTime?  @default(now()) @db.Timestamp(6)
+  date_expiration DateTime?  @db.Date
+  obligatoire     Boolean?   @default(false)
+  status          String?    @default("uploaded") @db.VarChar(20)
+  uploaded_by     String?    @db.Uuid
+  created_at      DateTime?  @default(now()) @db.Timestamp(6)
+  employees       employees? @relation(fields: [employe_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users           users?     @relation(fields: [uploaded_by], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model elements_paie {
+  id              String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  bulletin_id     String?         @db.Uuid
+  type            String          @db.VarChar(20)
+  nom             String          @db.VarChar(100)
+  base_calcul     Decimal?        @db.Decimal(10, 2)
+  taux            Decimal?        @db.Decimal(8, 4)
+  montant         Decimal         @db.Decimal(10, 2)
+  ordre_affichage Int?            @default(0)
+  bulletins_paie  bulletins_paie? @relation(fields: [bulletin_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model employees {
+  id                   String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  company_id           String?              @db.Uuid
+  matricule            String               @unique @db.VarChar(20)
+  nom                  String               @db.VarChar(100)
+  prenom               String               @db.VarChar(100)
+  cin                  String               @unique @db.VarChar(20)
+  email                String?              @unique @db.VarChar(255)
+  telephone            String?              @db.VarChar(20)
+  rue                  String?
+  ville                String?              @db.VarChar(100)
+  code_postal          String?              @db.VarChar(10)
+  pays                 String?              @default("Maroc") @db.VarChar(100)
+  date_embauche        DateTime             @db.Date
+  date_fin_contrat     DateTime?            @db.Date
+  poste                String               @db.VarChar(100)
+  departement          String               @db.VarChar(100)
+  type_contrat         String               @db.VarChar(20)
+  duree_contrat        Int?
+  periode_essai_debut  DateTime?            @db.Date
+  periode_essai_fin    DateTime?            @db.Date
+  salaire_base         Decimal              @db.Decimal(10, 2)
+  salaire_brut         Decimal?             @db.Decimal(10, 2)
+  mode_paiement        String?              @db.VarChar(30)
+  heures_travail_hebdo Decimal?             @default(40) @db.Decimal(4, 2)
+  rib                  String?              @db.VarChar(30)
+  banque               String?              @db.VarChar(100)
+  numero_cnss          String?              @db.VarChar(20)
+  affiliation_cnss_amo Boolean?             @default(false)
+  affiliation_cimr     Boolean?             @default(false)
+  taux_cimr            Decimal?             @db.Decimal(5, 2)
+  status               String               @db.VarChar(20)
+  evaluation_score     Int?
+  risque_turnover      String?              @db.VarChar(20)
+  situation_familiale  String?              @db.VarChar(50)
+  manager_id           String?              @db.Uuid
+  avatar_url           String?
+  created_at           DateTime?            @default(now()) @db.Timestamp(6)
+  updated_at           DateTime?            @default(now()) @db.Timestamp(6)
+  absences             absences[]
+  avantages            avantages[]
+  bulletins_paie       bulletins_paie[]
+  competences          competences[]
+  demandes_conges      demandes_conges[]
+  diplomes             diplomes[]
+  documents_employes   documents_employes[]
+  companies            companies?           @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  employees            employees?           @relation("employeesToemployees", fields: [manager_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  other_employees      employees[]          @relation("employeesToemployees")
+  evaluations          evaluations[]
+  primes               primes[]
+  retenues             retenues[]
+  virements            virements[]
+}
+
+model evaluations {
+  id                                  String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  employe_id                          String?                   @db.Uuid
+  type                                String                    @db.VarChar(20)
+  titre                               String                    @db.VarChar(200)
+  description                         String?
+  date_prevue                         DateTime                  @db.Date
+  date_realisation                    DateTime?                 @db.Date
+  status                              String?                   @default("planifiée") @db.VarChar(20)
+  note_globale                        Decimal?                  @db.Decimal(3, 2)
+  commentaire_employe                 String?
+  commentaire_manager                 String?
+  commentaire_rh                      String?
+  prime_recommandee                   Decimal?                  @db.Decimal(10, 2)
+  augmentation_recommandee            Decimal?                  @db.Decimal(5, 2)
+  risque_turnover                     String?                   @db.VarChar(20)
+  potentiel                           String?                   @db.VarChar(20)
+  signature_employe                   Boolean?                  @default(false)
+  signature_manager                   Boolean?                  @default(false)
+  cree_par                            String?                   @db.Uuid
+  valide_par                          String?                   @db.Uuid
+  created_at                          DateTime?                 @default(now()) @db.Timestamp(6)
+  updated_at                          DateTime?                 @default(now()) @db.Timestamp(6)
+  criteres_evaluation                 criteres_evaluation[]
+  users_evaluations_cree_parTousers   users?                    @relation("evaluations_cree_parTousers", fields: [cree_par], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  employees                           employees?                @relation(fields: [employe_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users_evaluations_valide_parTousers users?                    @relation("evaluations_valide_parTousers", fields: [valide_par], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  formations_recommandees             formations_recommandees[]
+  objectifs                           objectifs[]
+}
+
+model formations_recommandees {
+  id            String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  evaluation_id String?      @db.Uuid
+  nom           String       @db.VarChar(200)
+  description   String?
+  priorite      String?      @db.VarChar(20)
+  evaluations   evaluations? @relation(fields: [evaluation_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model objectifs {
+  id            String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  evaluation_id String?      @db.Uuid
+  description   String
+  atteint       Boolean?     @default(false)
+  commentaire   String?
+  evaluations   evaluations? @relation(fields: [evaluation_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model primes {
+  id          String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  employe_id  String?    @db.Uuid
+  nom         String     @db.VarChar(100)
+  montant     Decimal    @db.Decimal(10, 2)
+  type        String     @db.VarChar(20)
+  frequence   String     @db.VarChar(20)
+  base_calcul String?    @db.VarChar(50)
+  description String?
+  date_debut  DateTime?  @db.Date
+  date_fin    DateTime?  @db.Date
+  actif       Boolean?   @default(true)
+  created_at  DateTime?  @default(now()) @db.Timestamp(6)
+  employees   employees? @relation(fields: [employe_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model retenues {
+  id          String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  employe_id  String?    @db.Uuid
+  nom         String     @db.VarChar(100)
+  montant     Decimal    @db.Decimal(10, 2)
+  type        String     @db.VarChar(20)
+  obligatoire Boolean?   @default(false)
+  details     String?
+  date_debut  DateTime?  @db.Date
+  date_fin    DateTime?  @db.Date
+  actif       Boolean?   @default(true)
+  created_at  DateTime?  @default(now()) @db.Timestamp(6)
+  employees   employees? @relation(fields: [employe_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model subscriptions {
+  id                  String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  company_id          String?    @db.Uuid
+  plan                String     @db.VarChar(50)
+  status              String     @db.VarChar(20)
+  start_date          DateTime   @db.Date
+  end_date            DateTime   @db.Date
+  billing_cycle       String     @db.VarChar(20)
+  payment_provider_id String?    @db.VarChar(255)
+  created_at          DateTime?  @default(now()) @db.Timestamp(6)
+  updated_at          DateTime?  @default(now()) @db.Timestamp(6)
+  companies           companies? @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model types_conges {
+  id              String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  company_id      String?           @db.Uuid
+  nom             String            @db.VarChar(100)
+  duree_standard  String?           @db.VarChar(50)
+  modifiable      Boolean?          @default(true)
+  impact_salaire  String            @db.VarChar(20)
+  couleur         String?           @db.VarChar(7)
+  description     String?
+  limite          Int?
+  actif           Boolean?          @default(true)
+  legal           Boolean?          @default(false)
+  created_at      DateTime?         @default(now()) @db.Timestamp(6)
+  demandes_conges demandes_conges[]
+  companies       companies?        @relation(fields: [company_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model users {
+  id                                                           String               @id(map: "User_pkey") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email                                                        String               @unique(map: "User_email_key") @db.VarChar(255)
+  password_hash                                                String               @db.VarChar(255)
+  role                                                         String               @db.VarChar(50)
+  company_id                                                   String?              @db.Uuid
+  first_name                                                   String?              @db.VarChar(100)
+  last_name                                                    String?              @db.VarChar(100)
+  is_active                                                    Boolean?             @default(true)
+  last_login                                                   DateTime?            @db.Timestamp(6)
+  created_at                                                   DateTime?            @default(now()) @db.Timestamp(6)
+  updated_at                                                   DateTime?            @default(now()) @db.Timestamp(6)
+  bulletins_paie_bulletins_paie_genere_parTousers              bulletins_paie[]     @relation("bulletins_paie_genere_parTousers")
+  bulletins_paie_bulletins_paie_valide_parTousers              bulletins_paie[]     @relation("bulletins_paie_valide_parTousers")
+  demandes_conges_demandes_conges_validation_manager_idTousers demandes_conges[]    @relation("demandes_conges_validation_manager_idTousers")
+  demandes_conges_demandes_conges_validation_rh_idTousers      demandes_conges[]    @relation("demandes_conges_validation_rh_idTousers")
+  documents_employes                                           documents_employes[]
+  evaluations_evaluations_cree_parTousers                      evaluations[]        @relation("evaluations_cree_parTousers")
+  evaluations_evaluations_valide_parTousers                    evaluations[]        @relation("evaluations_valide_parTousers")
+  companies                                                    companies?           @relation(fields: [company_id], references: [id], onUpdate: NoAction, map: "User_company_id_fkey")
+}
+
+model virements {
+  id             String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  bulletin_id    String?         @db.Uuid
+  employe_id     String?         @db.Uuid
+  montant        Decimal         @db.Decimal(10, 2)
+  reference      String?         @db.VarChar(50)
+  statut         String?         @default("en_attente") @db.VarChar(20)
+  date_execution DateTime?       @db.Date
+  motif_rejet    String?
+  created_at     DateTime?       @default(now()) @db.Timestamp(6)
+  bulletins_paie bulletins_paie? @relation(fields: [bulletin_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  employees      employees?      @relation(fields: [employe_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
