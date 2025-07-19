@@ -75,7 +75,13 @@ const AuthService = {
       }
     });
 
-    return { token }; // Tu pourras l'envoyer par e-mail plus tard
+    const resetLink = `https://paie-simplifiee.lovable.app/reset-password?token=${token}&email=${encodeURIComponent(email)}`;
+
+  return {
+    success: true,
+    message: 'Lien de réinitialisation simulé',
+    resetLink // 👈 tu affiches le lien ici
+  };
   },
 
   async updatePassword(email, newPassword) {
