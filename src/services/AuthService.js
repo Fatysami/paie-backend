@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { generateToken, generateRefreshToken } from '../utils/generateToken.js';
+import crypto from 'crypto';
 
 const prisma = new PrismaClient();
 
@@ -59,17 +60,41 @@ const AuthService = {
     });
   },
 
-  async findUserByEmail(email) {
-  return await prisma.users.findUnique({ where: { email } });
-},
+  async requestPasswordReset(email) {
+    const user = await prisma.users.findUnique({ where: { email } });
+    if (!user) throw new Error('Utilisateur non trouvé');
 
-async updatePassword(email, newPassword) {
-  const hashed = await bcrypt.hash(newPassword, 10);
-  return await prisma.users.update({
-    where: { email },
-    data: { password_hash: hashed }
-  });
-}
+    const token = crypto.randomBytes(32).toString('hex');
+    const expiry = new Date(Date.now() + 3600000); // 1h
+
+    await prisma.users.update({
+      where: { email },
+      data: {
+        reset_token: token,
+        reset_token_expiry: expiry
+      }
+    });
+
+    return { token }; // Tu pourras l'envoyer par e-mail plus tard
+  },
+
+  async updatePassword(email, newPassword) {
+    const user = await prisma.users.findUnique({ where: { email } });
+    if (!user) throw new Error('Utilisateur non trouvé');
+
+    const hashed = await bcrypt.hash(newPassword, 12);
+
+    await prisma.users.update({
+      where: { email },
+      data: {
+        password_hash: hashed,
+        reset_token: null,
+        reset_token_expiry: null
+      }
+    });
+
+    return { message: 'Mot de passe mis à jour' };
+  }
 };
 
 export default AuthService;

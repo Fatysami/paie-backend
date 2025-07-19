@@ -52,27 +52,24 @@ const AuthController = {
 },
 
 async resetPassword(req, res) {
-  try {
-    const { email } = req.body;
-    const user = await AuthService.findUserByEmail(email);
-    if (!user) return res.status(404).json({ success: false, message: "Utilisateur introuvable" });
+    try {
+      const { email } = req.body;
+      const result = await AuthService.requestPasswordReset(email);
+      res.json({ success: true, message: 'Lien de réinitialisation simulé', token: result.token });
+    } catch (err) {
+      res.status(400).json({ success: false, message: err.message });
+    }
+  },
 
-    // Simule l'envoi d'un email (dans un vrai cas, tu générerais un token unique)
-    res.json({ success: true, message: "Email de réinitialisation envoyé (simulé)" });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+  async updatePassword(req, res) {
+    try {
+      const { email, newPassword } = req.body;
+      const result = await AuthService.updatePassword(email, newPassword);
+      res.json({ success: true, message: result.message });
+    } catch (err) {
+      res.status(400).json({ success: false, message: err.message });
+    }
   }
-},
-
-async updatePassword(req, res) {
-  try {
-    const { email, newPassword } = req.body;
-    const updated = await AuthService.updatePassword(email, newPassword);
-    res.json({ success: true, message: "Mot de passe mis à jour" });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
-  }
-}
 
 };
 
