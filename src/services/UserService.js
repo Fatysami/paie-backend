@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
+import bcrypt from 'bcryptjs';
 
 const UserService = {
 async getAll(params) {
@@ -110,8 +111,29 @@ async getAll(params) {
   },
 
   async create(data) {
-    return prisma.users.create({ data });
-  },
+  const { email, password, role, company_id, first_name, last_name } = data;
+
+  if (!email || !password || !role) {
+    throw new Error('Champs requis manquants');
+  }
+
+  const existing = await prisma.users.findUnique({ where: { email } });
+  if (existing) throw new Error('Email déjà utilisé');
+
+  const hashed = await bcrypt.hash(password, 12);
+
+  return prisma.users.create({
+    data: {
+      email,
+      password_hash: hashed,
+      role,
+      company_id,
+      first_name,
+      last_name,
+      is_active: true
+    }
+  });
+},
 
   async update(id, data) {
     return prisma.users.update({
