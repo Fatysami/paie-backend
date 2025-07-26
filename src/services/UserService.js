@@ -136,11 +136,22 @@ async getAll(params) {
 },
 
   async update(id, data) {
-    return prisma.users.update({
-      where: { id },
-      data
-    });
-  },
+  const user = await prisma.users.findUnique({ where: { id } });
+  if (!user) throw new Error('Utilisateur introuvable');
+
+  const updateData = { ...data };
+
+  if (data.password) {
+    const hashed = await bcrypt.hash(data.password, 10);
+    updateData.password_hash = hashed;
+    delete updateData.password;
+  }
+
+  return prisma.users.update({
+    where: { id },
+    data: updateData
+  });
+},
 
   async remove(id) {
     return prisma.users.delete({ where: { id } });

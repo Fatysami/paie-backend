@@ -3,7 +3,7 @@ import { z } from 'zod';
 export const schemas = {
   signup: z.object({
     email: z.string().email(),
-    password: z.string().min(6),
+    password: z.string().min(6).optional(),
     role: z.enum(['admin', 'rh', 'manager', 'comptable', 'employee']),
     company_id: z.string().uuid().optional()
   }),
