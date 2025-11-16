@@ -4,10 +4,24 @@ const prisma = new PrismaClient();
 export function subscriptionMinLevel(requiredPlans = []) {
   return async (req, res, next) => {
     try {
-      const companyId = req.user.company_id;
+      const user = req.user;
 
-      if (!companyId) return res.status(403).json({ success: false, message: 'Entreprise introuvable' });
+      // 1️⃣ ADMIN GLOBAL → accès total
+      if (user.role === 'admin' && user.company_id === null) {
+        return next();
+      }
 
+      const companyId = user.company_id;
+
+      // 2️⃣ Pour les autres rôles → l'entreprise doit exister
+      if (!companyId) {
+        return res.status(403).json({ 
+          success: false, 
+          message: 'Entreprise introuvable' 
+        });
+      }
+
+      // 3️⃣ Vérification de l'abonnement
       const subscription = await prisma.subscriptions.findFirst({
         where: {
           company_id: companyId,
@@ -17,16 +31,26 @@ export function subscriptionMinLevel(requiredPlans = []) {
       });
 
       if (!subscription) {
-        return res.status(403).json({ success: false, message: 'Pas d’abonnement actif' });
+        return res.status(403).json({ 
+          success: false, 
+          message: 'Pas d’abonnement actif' 
+        });
       }
 
+      // 4️⃣ Vérifier si le plan satisfait les exigences
       if (!requiredPlans.includes(subscription.plan)) {
-        return res.status(403).json({ success: false, message: `Plan requis : ${requiredPlans.join(', ')}` });
+        return res.status(403).json({
+          success: false,
+          message: `Plan requis : ${requiredPlans.join(', ')}`
+        });
       }
 
       next();
     } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      res.status(500).json({ 
+        success: false, 
+        message: err.message 
+      });
     }
   };
 }

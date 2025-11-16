@@ -1,16 +1,19 @@
 export function companyOnly(req, res, next) {
-  // Autoriser admin global sans restriction
-  if (req.user.role === 'admin' && !req.user.company_id) {
+  const user = req.user;
+
+  // 1. Admin global (company_id null) : accès complet
+  if (user.role === 'admin' && user.company_id === null) {
     return next();
   }
 
-  // Autoriser admin classique lié à une entreprise
-  if (req.user.role === 'admin') {
+  // 2. Admin associé à une entreprise : accès OK
+  if (user.role === 'admin') {
     return next();
   }
 
-  // Récupérer la company_id de la requête (correspond aux vrais champs utilisés)
+  // 3. Pour les autres rôles (RH, manager, etc.)
   const requestedCompanyId =
+    req.params.company_id ||
     req.params.id ||
     req.body.company_id ||
     req.query.company_id;
@@ -18,15 +21,14 @@ export function companyOnly(req, res, next) {
   if (!requestedCompanyId) {
     return res.status(400).json({
       success: false,
-      message: 'ID entreprise manquant dans la requête.'
+      message: 'company_id manquant dans la requête.'
     });
   }
 
-  // Vérifier que l'utilisateur appartient à la même entreprise
-  if (requestedCompanyId != req.user.company_id) {
+  if (requestedCompanyId != user.company_id) {
     return res.status(403).json({
       success: false,
-      message: "Accès interdit à cette entreprise."
+      message: 'Accès interdit à cette entreprise.'
     });
   }
 
