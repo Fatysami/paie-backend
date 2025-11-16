@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
-export function subscriptionAccess(requiredPlans = []) {
+export function subscriptionMinLevel(requiredPlans = []) {
   return async (req, res, next) => {
     try {
       const companyId = req.user.company_id;
