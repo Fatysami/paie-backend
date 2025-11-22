@@ -1,17 +1,17 @@
 export function companyOnly(req, res, next) {
   const user = req.user;
 
-  // 1. ADMIN GLOBAL → accès complet
+  // ADMIN GLOBAL (company_id === null) → ACCÈS TOTAL
   if (user.role === 'admin' && user.company_id === null) {
     return next();
   }
 
-  // 2. ADMIN D’ENTREPRISE → accès complet à son entreprise
+  // ADMIN AVEC ENTREPRISE → OK
   if (user.role === 'admin' && user.company_id !== null) {
     return next();
   }
 
-  // 3. RH / MANAGER → doivent appartenir à l’entreprise
+  // RH / MANAGER → doivent appartenir à l’entreprise
   const requestedCompanyId =
     req.params.company_id ||
     req.params.id ||
