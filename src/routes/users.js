@@ -20,7 +20,6 @@ router.use(authMiddleware);
  */
 router.get(
   '/',
-  subscriptionMinLevel(['pro', 'premium']), // exiger au moins ces plans
   UserController.getAll
 );
 
