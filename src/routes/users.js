@@ -4,33 +4,68 @@ import authMiddleware from '../middlewares/authMiddleware.js';
 import adminOnly from '../middlewares/adminOnly.js';
 import { companyOnly } from '../middlewares/companyOnly.js';
 import { validate, schemas } from '../middlewares/validation.js';
-import { subscriptionMinLevel } from '../middlewares/subscriptionAccessLevel.js';
+import { subscriptionMinLevel } from '../middlewares/subscriptionMinLevel.js';
 import managerOrAdmin from '../middlewares/managerOrAdmin.js';
 
 const router = Router();
 
 // 🔐 Toutes les routes nécessitent d'être connecté
-router.use(authMiddleware); 
+router.use(authMiddleware);
 
-// 🔍 Liste tous les utilisateurs (admin/rh uniquement - à restreindre plus tard)
-router.get('/', subscriptionMinLevel('pro'), UserController.getAll);
+/**
+ * GET /api/users
+ * Admin global → OK (company_id null)
+ * Admin entreprise → OK
+ * RH/manager → doivent appartenir à une entreprise
+ */
+router.get(
+  '/',
+  subscriptionMinLevel(['pro', 'premium']), // exiger au moins ces plans
+  UserController.getAll
+);
 
-// 🔍 Détail d’un utilisateur
+/**
+ * GET /api/users/:id
+ * Admin global → OK
+ * Admin entreprise → OK
+ * RH/Manager → accès limité à leur entreprise
+ */
 router.get('/:id', companyOnly, UserController.getById);
 
-// 🔍 Utilisateurs d’une entreprise (accès restreint à sa propre entreprise)
+/**
+ * GET /api/users/company/:id
+ * Accès restreint à l’entreprise de l’utilisateur
+ */
 router.get('/company/:id', companyOnly, UserController.getByCompany);
 
+/**
+ * POST /api/users
+ * Admin global → peut créer un utilisateur pour n'importe quelle entreprise
+ * Admin entreprise → pour son entreprise
+ * RH/Manager → uniquement leur entreprise
+ */
+router.post(
+  '/',
+  managerOrAdmin,                       // rôle OK
+  subscriptionMinLevel(['pro', 'premium']), // abonnement OK
+  companyOnly,                           // entreprise OK
+  validate(schemas.user),
+  UserController.create
+);
 
-// ➕ Créer un utilisateur (accessible aux managers ou admins avec abonnement pro+)
-router.post('/', managerOrAdmin, subscriptionMinLevel('pro'), validate(schemas.user), UserController.create);
+/**
+ * PUT /api/users/:id
+ */
+router.put(
+  '/:id',
+  managerOrAdmin,
+  companyOnly,
+  UserController.update
+);
 
-
-// 🔄 Modifier un utilisateur (manager/admin uniquement, entreprise concernée)
-router.put('/:id', managerOrAdmin, companyOnly, UserController.update);
-
-
-// ❌ Supprimer un utilisateur (admin uniquement)
+/**
+ * DELETE /api/users/:id
+ */
 router.delete('/:id', adminOnly, UserController.remove);
 
 export default router;
