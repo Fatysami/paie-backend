@@ -5,34 +5,37 @@ const UserController = {
 
   // 📌 GET /api/users
   async getAll(req, res) {
-    try {
-      const user = req.user;
-      const parsedQuery = qs.parse(req._parsedUrl.query);
+  try {
+    const user = req.user;
+    const parsedQuery = qs.parse(req._parsedUrl.query);
 
-      // 1️⃣ ADMIN GLOBAL : peut voir TOUS les utilisateurs
-      if (user.role === 'admin' && user.company_id === null) {
-        const users = await UserService.getAll(parsedQuery);
-        return res.json({ success: true, ...users });
-      }
-
-      // 2️⃣ ADMIN ENTREPRISE / RH / MANAGER : filtrage par entreprise
-      if (!user.company_id) {
-        return res.status(403).json({
-          success: false,
-          message: "Entreprise introuvable"
-        });
-      }
-
-      // Injecter un filtre obligatoire
-      parsedQuery.company_id = user.company_id;
-
+    // 1️⃣ ADMIN GLOBAL → voir tous les utilisateurs
+    if (user.role === "admin" && user.company_id === null) {
       const users = await UserService.getAll(parsedQuery);
-      res.json({ success: true, ...users });
-
-    } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
+      return res.json({ success: true, ...users });
     }
-  },
+
+    // 2️⃣ ADMIN ENTREPRISE / RH / MANAGER → filtrage par leur entreprise
+    if (!user.company_id) {
+      return res.status(403).json({
+        success: false,
+        message: "Entreprise introuvable"
+      });
+    }
+
+    // Injecter automatiquement company_id dans le filtre
+    parsedQuery.filter = {
+      ...parsedQuery.filter,
+      company_id: user.company_id
+    };
+
+    const users = await UserService.getAll(parsedQuery);
+    res.json({ success: true, ...users });
+
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+},
 
 
   // 📌 GET /api/users/:id

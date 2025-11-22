@@ -48,7 +48,6 @@ router.post(
   '/',
   managerOrAdmin,                       // rôle OK
   subscriptionMinLevel(['pro', 'premium']), // abonnement OK
-  companyOnly,                           // entreprise OK
   validate(schemas.user),
   UserController.create
 );
