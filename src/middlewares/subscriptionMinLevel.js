@@ -6,14 +6,13 @@ export function subscriptionMinLevel(requiredPlans = []) {
     try {
       const user = req.user;
 
-      // 1. ADMIN GLOBAL → bypass abonnement
+      // ADMIN GLOBAL → bypass
       if (user.role === 'admin' && user.company_id === null) {
         return next();
       }
 
       const companyId = user.company_id;
 
-      // 2. RH / Manager → doivent appartenir à une entreprise
       if (!companyId) {
         return res.status(403).json({
           success: false,
@@ -21,7 +20,6 @@ export function subscriptionMinLevel(requiredPlans = []) {
         });
       }
 
-      // 3. Vérifier abonnement
       const subscription = await prisma.subscriptions.findFirst({
         where: {
           company_id: companyId,

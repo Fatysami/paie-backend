@@ -12,58 +12,28 @@ const router = Router();
 // 🔐 Toutes les routes nécessitent d'être connecté
 router.use(authMiddleware);
 
-/**
- * GET /api/users
- * Admin global → OK (company_id null)
- * Admin entreprise → OK
- * RH/manager → doivent appartenir à une entreprise
- */
-router.get(
-  '/',
-  UserController.getAll
-);
+// GET /api/users → Admin global doit passer
+router.get('/', UserController.getAll);
 
-/**
- * GET /api/users/:id
- * Admin global → OK
- * Admin entreprise → OK
- * RH/Manager → accès limité à leur entreprise
- */
+// GET /api/users/:id
 router.get('/:id', companyOnly, UserController.getById);
 
-/**
- * GET /api/users/company/:id
- * Accès restreint à l’entreprise de l’utilisateur
- */
+// GET /api/users/company/:id
 router.get('/company/:id', companyOnly, UserController.getByCompany);
 
-/**
- * POST /api/users
- * Admin global → peut créer un utilisateur pour n'importe quelle entreprise
- * Admin entreprise → pour son entreprise
- * RH/Manager → uniquement leur entreprise
- */
+// POST /api/users
 router.post(
   '/',
-  managerOrAdmin,                       // rôle OK
-  subscriptionMinLevel(['pro', 'premium']), // abonnement OK
+  managerOrAdmin,
+  subscriptionMinLevel(['pro', 'premium']),
   validate(schemas.user),
   UserController.create
 );
 
-/**
- * PUT /api/users/:id
- */
-router.put(
-  '/:id',
-  managerOrAdmin,
-  companyOnly,
-  UserController.update
-);
+// PUT /api/users/:id
+router.put('/:id', managerOrAdmin, companyOnly, UserController.update);
 
-/**
- * DELETE /api/users/:id
- */
+// DELETE /api/users/:id
 router.delete('/:id', adminOnly, UserController.remove);
 
 export default router;

@@ -11,10 +11,10 @@ const authMiddleware = (req, res, next) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // Harmoniser les champs
+    // Harmoniser les champs camelCase → snake_case
     req.user = {
       ...decoded,
-      company_id: decoded.company_id ?? decoded.companyId ?? null, // <- CORRECTION MAGIQUE
+      company_id: decoded.company_id ?? decoded.companyId ?? null
     };
 
     next();
