@@ -7,6 +7,7 @@ import authRoutes from './routes/auth.js';
 import companyRoutes from './routes/companies.js';
 import userRoutes from './routes/users.js';
 import subscriptionRoutes from './routes/subscriptions.js';
+import settingsRoutes from './routes/settings.js';
 
 dotenv.config();
 const app = express();
@@ -20,6 +21,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/companies', companyRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
+app.use('/api/settings', settingsRoutes);
 
 // 🔁 Ping healthcheck
 app.get('/', (req, res) => {
