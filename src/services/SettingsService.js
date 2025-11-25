@@ -6,7 +6,6 @@ export const SettingsService = {
   async getAll() {
     const rows = await prisma.system_settings.findMany();
 
-    // transformer les données en format attendu par le frontend
     const result = {
       general: {},
       email: {},
@@ -15,8 +14,9 @@ export const SettingsService = {
     };
 
     for (const row of rows) {
-      if (!result[row.category]) continue;
-      result[row.category][row.key] = row.value;
+      if (result[row.category]) {
+        result[row.category][row.key] = row.value;
+      }
     }
 
     return result;
@@ -29,8 +29,17 @@ export const SettingsService = {
     for (const [key, value] of Object.entries(settings)) {
       updates.push(
         prisma.system_settings.upsert({
-          where: { category_key: { category, key } },
-          update: { value, updated_by: userId },
+          where: {
+            category_key: {
+              category,
+              key
+            }
+          },
+          update: {
+            value,
+            updated_by: userId,
+            updated_at: new Date()
+          },
           create: {
             category,
             key,

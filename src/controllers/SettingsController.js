@@ -1,4 +1,4 @@
-import { SettingsService } from '../services/SettingsService';
+import { SettingsService } from '../services/SettingsService.js';
 
 const SettingsController = {
 
@@ -25,15 +25,11 @@ const SettingsController = {
 
       const updated = await SettingsService.update(category, settings, userId);
 
-      // (optionnel) audit log
-      console.log("UPDATE_SETTINGS", { userId, category });
-
       res.json({ success: true, data: updated });
     } catch (err) {
       res.status(500).json({ success: false, message: err.message });
     }
   }
-
 };
 
 export default SettingsController;

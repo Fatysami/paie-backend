@@ -4,10 +4,13 @@ import authMiddleware from '../middlewares/authMiddleware.js';
 
 const router = Router();
 
-// Admin Global uniquement
+// Admin global ONLY
 router.use(authMiddleware, (req, res, next) => {
   if (req.user.role === 'admin' && req.user.company_id === null) return next();
-  return res.status(403).json({ success: false, message: "Réservé à l'admin global" });
+  return res.status(403).json({
+    success: false,
+    message: "Réservé à l'administrateur global"
+  });
 });
 
 router.get('/', SettingsController.get);
