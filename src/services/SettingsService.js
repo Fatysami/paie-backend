@@ -22,7 +22,6 @@ export const SettingsService = {
     return result;
   },
 
-
   async update(category, settings, userId) {
     const updates = [];
 

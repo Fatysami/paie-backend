@@ -26,6 +26,7 @@ const SettingsController = {
       const updated = await SettingsService.update(category, settings, userId);
 
       res.json({ success: true, data: updated });
+
     } catch (err) {
       res.status(500).json({ success: false, message: err.message });
     }
