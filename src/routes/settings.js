@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import SettingsController from '../controllers/settingsController.js';
+import SettingsController from '../controllers/SettingsController.js';
 import authMiddleware from '../middlewares/authMiddleware.js';
 
 const router = Router();
