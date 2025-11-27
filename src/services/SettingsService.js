@@ -29,10 +29,7 @@ export const SettingsService = {
       updates.push(
         prisma.system_settings.upsert({
           where: {
-            category_key: {
-              category,
-              key
-            }
+            category_key: { category, key }
           },
           update: {
             value,
