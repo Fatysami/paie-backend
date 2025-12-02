@@ -8,6 +8,7 @@ import companyRoutes from './routes/companies.js';
 import userRoutes from './routes/users.js';
 import subscriptionRoutes from './routes/subscriptions.js';
 import settingsRoutes from './routes/settings.js';
+
 import authMiddleware from './middlewares/authMiddleware.js';
 import blockIfNoSubscription  from './middlewares/blockIfNoSubscription.js';
 
@@ -18,9 +19,14 @@ app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
 
-// ✅ Routes
-app.use('/api', authMiddleware, blockIfNoSubscription);
+// 🚀 PUBLIC ROUTES (pas de blocage abonnement)
 app.use('/api/auth', authRoutes);
+app.use('/api/companies/public-register', companyRoutes);
+
+// 🚧 Toutes les routes suivantes nécessitent AUTH + abonnement actif
+app.use('/api', authMiddleware, blockIfNoSubscription);
+
+// ROUTES PROTÉGÉES
 app.use('/api/companies', companyRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);

@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
-export async function blockIfNoSubscription(req, res, next) {
+export default async function blockIfNoSubscription(req, res, next) {
   const companyId = req.user.companyId;
 
   // Admin global passe toujours
