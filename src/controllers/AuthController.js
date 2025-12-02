@@ -69,7 +69,26 @@ async resetPassword(req, res) {
     } catch (err) {
       res.status(400).json({ success: false, message: err.message });
     }
+  },
+  async activateAccount(req, res) {
+  const { token } = req.params;
+
+  const user = await prisma.users.findFirst({
+    where: { activation_token: token }
+  });
+
+  if (!user) {
+    return res.status(400).json({ success: false, message: "Token invalide" });
   }
+
+  await prisma.users.update({
+    where: { id: user.id },
+    data: { email_verified: true, activation_token: null }
+  });
+
+  res.json({ success: true, message: "Compte activé avec succès" });
+}
+
 
 };
 

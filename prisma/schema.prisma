@@ -363,6 +363,8 @@ model users {
   first_name                                                   String?              @db.VarChar(100)
   last_name                                                    String?              @db.VarChar(100)
   is_active                                                    Boolean?             @default(true)
+  email_verified Boolean? @default(false)  
+  activation_token String? @db.VarChar(255) 
   last_login                                                   DateTime?            @db.Timestamp(6)
   created_at                                                   DateTime?            @default(now()) @db.Timestamp(6)
   updated_at                                                   DateTime?            @default(now()) @db.Timestamp(6)

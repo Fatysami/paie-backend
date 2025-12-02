@@ -12,4 +12,6 @@ router.get('/me', authMiddleware, AuthController.me);
 router.post('/refresh', AuthController.refreshToken);
 router.post('/reset-password', AuthController.resetPassword);
 router.post('/update-password', AuthController.updatePassword);
+router.get('/activate/:token', AuthController.activateAccount);
+
 export default router;

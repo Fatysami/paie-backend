@@ -8,6 +8,7 @@ import companyRoutes from './routes/companies.js';
 import userRoutes from './routes/users.js';
 import subscriptionRoutes from './routes/subscriptions.js';
 import settingsRoutes from './routes/settings.js';
+import { blockIfNoSubscription } from './middlewares/blockIfNoSubscription.js';
 
 dotenv.config();
 const app = express();
@@ -17,6 +18,7 @@ app.use(express.json());
 app.use(morgan('dev'));
 
 // ✅ Routes
+app.use('/api', authMiddleware, blockIfNoSubscription);
 app.use('/api/auth', authRoutes);
 app.use('/api/companies', companyRoutes);
 app.use('/api/users', userRoutes);

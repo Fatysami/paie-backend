@@ -6,6 +6,7 @@ import { companyOnly } from '../middlewares/companyOnly.js';
 import { validate, schemas } from '../middlewares/validation.js';
 import { subscriptionMinLevel } from '../middlewares/subscriptionMinLevel.js';
 import managerOrAdmin from '../middlewares/managerOrAdmin.js';
+import { checkSubscriptionLimits } from '../middlewares/checkSubscriptionLimits.js';
 
 const router = Router();
 
@@ -26,6 +27,7 @@ router.post(
   '/',
   managerOrAdmin,
   subscriptionMinLevel(['pro', 'premium']),
+  checkSubscriptionLimits,
   validate(schemas.user),
   UserController.create
 );

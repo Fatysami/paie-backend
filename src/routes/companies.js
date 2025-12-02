@@ -6,6 +6,15 @@ import { companyOnly } from '../middlewares/companyOnly.js';
 
 const router = Router();
 
+/* --------------------------------
+   PUBLIC ROUTE : INSCRIPTION ENTREPRISE
+   Accessible sans login
+-------------------------------- */
+router.post('/public-register', CompanyController.publicRegister);
+
+/* --------------------------------
+   ROUTES PROTÉGÉES
+-------------------------------- */
 router.use(authMiddleware);
 
 router.get('/', adminOnly, CompanyController.index);
