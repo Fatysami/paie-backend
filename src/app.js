@@ -8,7 +8,8 @@ import companyRoutes from './routes/companies.js';
 import userRoutes from './routes/users.js';
 import subscriptionRoutes from './routes/subscriptions.js';
 import settingsRoutes from './routes/settings.js';
-import { blockIfNoSubscription } from './middlewares/blockIfNoSubscription.js';
+import authMiddleware from './middlewares/authMiddleware.js';
+import blockIfNoSubscription  from './middlewares/blockIfNoSubscription.js';
 
 dotenv.config();
 const app = express();
