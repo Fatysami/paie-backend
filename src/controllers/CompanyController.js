@@ -2,7 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import CompanyService from '../services/CompanyService.js';
-import emailService from '../services/emailService.js'; // ← ajoute si tu as un service email
+import { emailService } from '../services/emailService.js';
 
 const prisma = new PrismaClient();
 
