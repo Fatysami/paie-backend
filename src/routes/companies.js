@@ -18,9 +18,26 @@ router.post('/public-register', CompanyController.publicRegister);
 router.use(authMiddleware);
 
 router.get('/', adminOnly, CompanyController.index);
-router.get('/:id', CompanyController.show);
+
+/**
+ * ADMIN GLOBAL → voir n’importe quelle entreprise
+ * RH / Manager → voir uniquement leur entreprise
+ */
+router.get('/:id', companyOnly, CompanyController.show);
+
+/**
+ * ADMIN GLOBAL → créer entreprise + admin + abonnement trial
+ */
 router.post('/', adminOnly, CompanyController.create);
-router.put('/:id', authMiddleware, companyOnly, CompanyController.update);
+
+/**
+ * ADMIN GLOBAL ou RH → modifier leur entreprise
+ */
+router.put('/:id', companyOnly, CompanyController.update);
+
+/**
+ * ADMIN GLOBAL → supprimer entreprise
+ */
 router.delete('/:id', adminOnly, CompanyController.delete);
 
 export default router;
