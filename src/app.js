@@ -12,6 +12,8 @@ import settingsRoutes from './routes/settings.js';
 import authMiddleware from './middlewares/authMiddleware.js';
 import blockIfNoSubscription  from './middlewares/blockIfNoSubscription.js';
 
+import companySettingsRoutes from "./routes/companySettings.routes.js";
+
 dotenv.config();
 const app = express();
 
@@ -31,6 +33,9 @@ app.use('/api/companies', companyRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
 app.use('/api/settings', settingsRoutes);
+
+app.use("/api/companies/:companyId/settings",companySettingsRoutes);
+
 
 // 🔁 Ping healthcheck
 app.get('/', (req, res) => {
