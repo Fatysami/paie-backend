@@ -1,7 +1,10 @@
 import express from "express";
 import CompanySettingsController from "../controllers/CompanySettingsController.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
-import roleMiddleware from "../middlewares/roleMiddleware.js";
+import companyOnly from "../middlewares/companyOnly.js";
+import adminOnly from "../middlewares/adminOnly.js";
+import managerOrAdmin from "../middlewares/managerOrAdmin.js";
+
 
 const router = express.Router({ mergeParams: true });
 
@@ -12,18 +15,20 @@ const router = express.Router({ mergeParams: true });
 router.get(
   "/company",
   authMiddleware,
-  roleMiddleware(["admin", "rh", "manager"]),
+  companyOnly,
+  managerOrAdmin,
   CompanySettingsController.getCompany
 );
 
 /**
  * UPDATE infos société
- * Role: admin seulement
+ * admin uniquement
  */
 router.put(
   "/company",
   authMiddleware,
-  roleMiddleware(["admin"]),
+  companyOnly,
+  adminOnly,
   CompanySettingsController.updateCompany
 );
 
