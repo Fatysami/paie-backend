@@ -3,7 +3,7 @@ import CompanySettingsController from "../controllers/CompanySettingsController.
 import authMiddleware from "../middlewares/authMiddleware.js";
 import { companyOnly } from "../middlewares/companyOnly.js";
 import adminOnly from "../middlewares/adminOnly.js";
-import { managerOrAdmin } from "../middlewares/managerOrAdmin.js";
+import managerOrAdmin from "../middlewares/managerOrAdmin.js";
 
 
 const router = express.Router({ mergeParams: true });
