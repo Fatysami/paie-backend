@@ -1,6 +1,8 @@
-import prisma from "../db/prisma.js";
+import { PrismaClient } from '@prisma/client';
 
-class CompanySettingsService {
+const prisma = new PrismaClient();
+
+const CompanySettingsService = {
   async getCompany(companyId) {
     const company = await prisma.companies.findUnique({
       where: { id: companyId },
@@ -18,28 +20,27 @@ class CompanySettingsService {
         cnss_number: true,
         logo_url: true,
         created_at: true,
-        updated_at: true,
-      },
+        updated_at: true
+      }
     });
 
     if (!company) {
-      throw new Error("Société introuvable");
+      throw new Error('Société introuvable');
     }
 
     return company;
-  }
+  },
 
   async updateCompany(companyId, data) {
-    // ✅ validation minimale
-    if (!data.name) throw new Error("name obligatoire");
-    if (!data.address) throw new Error("address obligatoire");
-    if (!data.email) throw new Error("email obligatoire");
+    if (!data.name) throw new Error('name obligatoire');
+    if (!data.address) throw new Error('address obligatoire');
+    if (!data.email) throw new Error('email obligatoire');
 
     if (data.ice && data.ice.length !== 15) {
-      throw new Error("ICE doit contenir 15 chiffres");
+      throw new Error('ICE doit contenir 15 chiffres');
     }
 
-    return prisma.companies.update({
+    return await prisma.companies.update({
       where: { id: companyId },
       data: {
         name: data.name,
@@ -52,10 +53,10 @@ class CompanySettingsService {
         ice: data.ice,
         rc: data.rc,
         cnss_number: data.cnss_number,
-        updated_at: new Date(),
-      },
+        updated_at: new Date()
+      }
     });
   }
-}
+};
 
-export default new CompanySettingsService();
+export default CompanySettingsService;
